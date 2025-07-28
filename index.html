@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diario Emocional</title>
+  <style>
+    /* Reset y estilos base */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(120deg,#c9d6ff,#e2e2e2);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:20px;
+    }
+    .container {
+      background:#fff;
+      border-radius:20px;
+      width:100%;
+      max-width:800px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.1);
+      overflow:hidden;
+    }
+    header {
+      background:#3498db;
+      padding:20px;
+      text-align:center;
+    }
+    header h1 { color:#fff; font-size:1.8rem; }
+    main {
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+    }
+    label { font-weight:bold; margin-bottom:5px; display:block; }
+    select, textarea, button {
+      width:100%;
+      padding:12px;
+      font-size:1rem;
+      border:1px solid #ccc;
+      border-radius:8px;
+    }
+    textarea { resize:vertical; min-height:100px; }
+    button {
+      background:#3498db;
+      color:#fff;
+      font-weight:bold;
+      border:none;
+      cursor:pointer;
+      transition:background .2s;
+    }
+    button:hover { background:#2980b9; }
+    #consejo {
+      margin:15px 0;
+      background:#ecf0f1;
+      padding:15px;
+      border-radius:8px;
+      color:#2d3436;
+    }
+    #consejo h2 {
+      margin-bottom:10px;
+      font-size:1.1rem;
+      color:#34495e;
+    }
+    #consejo ul {
+      list-style:disc inside;
+      line-height:1.5;
+    }
+    #historial {
+      padding:20px;
+      border-top:1px solid #ddd;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:400px;
+      overflow-y:auto;
+    }
+    .entrada {
+      position:relative;
+      padding:15px;
+      background:#f9f9f9;
+      border-radius:8px;
+    }
+    .entrada strong {
+      display:block;
+      margin-bottom:8px;
+      color:#555;
+    }
+    .entrada div { margin-bottom:6px; color:#333; }
+    .borrar-btn {
+      position:absolute;
+      top:10px;
+      right:10px;
+      background:transparent;
+      border:none;
+      font-size:1.2rem;
+      color:#999;
+      opacity:0;
+      transition:opacity .3s ease;
+      cursor:pointer;
+    }
+    .entrada:hover .borrar-btn { opacity:1; }
+    .borrar-btn:hover { color:#e74c3c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌈 Diario Emocional</h1>
+    </header>
+    <main>
+      <div>
+        <label for="emocion">¿Cómo te sentís hoy?</label>
+        <select id="emocion">
+          <!-- Lista de emociones -->
+          <option value="feliz">😊 Feliz</option>
+          <option value="triste">😢 Triste</option>
+          <option value="estresado">😣 Estresado</option>
+          <option value="enojado">😠 Enojado</option>
+          <option value="ansioso">😰 Ansioso</option>
+          <option value="motivado">🚀 Motivado</option>
+          <option value="cansado">😴 Cansado</option>
+          <option value="agradecido">🙏 Agradecido</option>
+          <option value="solo">😔 Solo</option>
+          <option value="abrumado">😵 Abrumado</option>
+          <option value="esperanzado">🌟 Esperanzado</option>
+          <option value="confundido">🤔 Confundido</option>
+          <option value="culpable">😞 Culpable</option>
+          <option value="inspirado">💡 Inspirado</option>
+          <option value="vacio">⚪ Vacío</option>
+          <option value="orgulloso">🏆 Orgulloso</option>
+          <option value="decepcionado">😕 Decepcionado</option>
+          <option value="en_paz">🕊️ En paz</option>
+          <option value="frustrado">😤 Frustrado</option>
+          <option value="inseguro">😟 Inseguro</option>
+          <!-- Más emociones según necesidad -->
+        </select>
+      </div>
+      <div>
+        <label for="entrada">Escribí lo que quieras expresar:</label>
+        <textarea id="entrada" placeholder="Contá tu día..."></textarea>
+      </div>
+      <button id="guardarBtn">🌱 Guardar y obtener consejo</button>
+      <div id="consejo"></div>
+      <section id="historial"></section>
+    </main>
+  </div>
+  <script>
+    // Depuración: imprime cuando se carga el script
+    console.log('Diario Emocional: script cargado.');
+
+    const recomendaciones = {
+      feliz: { consejo: 'Tu felicidad ilumina tu día.', acciones: 'Llama a un amigo o envía un mensaje alegre.', mejorar: 'Identifica y repite los pequeños detalles que te hacen feliz.', evitar: 'No subestimarlas.' },
+      triste: { consejo: 'La tristeza también enseña.', acciones: 'Escribe tus emociones y llama a alguien de confianza.', mejorar: 'Incluye una actividad reconfortante como música suave.', evitar: 'Quedarte aislado.' },
+      estresado: { consejo: 'Respira, toma un respiro.', acciones: 'Practica respiraciones profundas durante 2 minutos.', mejorar: 'Organiza tus tareas en intervalos de 25 minutos y descansa.', evitar: 'Multitarea excesiva.' },
+      enojado: { consejo: 'Canaliza la ira de manera saludable.', acciones: 'Sal a caminar o practica un ejercicio breve.', mejorar: 'Identifica la causa antes de expresar tu enojo.', evitar: 'Reacciones impulsivas.' },
+      ansioso: { consejo: 'Enfócate en el presente.', acciones: 'Aplica la técnica 5-4-3-2-1.', mejorar: 'Establece una rutina diaria de meditación.', evitar: 'Consumir noticias estresantes.' },
+      motivado: { consejo: 'Aprovecha esta energía.', acciones: 'Define una meta e inicia la primer acción en 5 minutos.', mejorar: 'Celebra incluso los pequeños avances.', evitar: 'Procrastinar.' },
+      cansado: { consejo: 'Escucha a tu cuerpo.', acciones: 'Toma una siesta de 20 minutos.', mejorar: 'Mantén horarios regulares de sueño.', evitar: 'Cafeína por la tarde.' },
+      agradecido: { consejo: 'La gratitud fortalece el ánimo.', acciones: 'Escribe tres cosas por las que estás agradecido.', mejorar: 'Comparte tu gratitud con alguien.', evitar: 'Centrarte en lo que falta.' },
+      solo: { consejo: 'Conecta con otros.', acciones: 'Envía un mensaje o únete a un chat grupal.', mejorar: 'Planifica al menos una salida social por semana.', evitar: 'Autoaislarte.' },
+      abrumado: { consejo: 'Descompone el problema.', acciones: 'Escribe tres tareas prioritarias y empieza por la primera.', mejorar: 'Aprende a delegar cuando sea posible.', evitar: 'Intentar hacerlo todo.' }
+    };
+
+    const guardarBtn = document.getElementById('guardarBtn');
+    const selectEmocion = document.getElementById('emocion');
+    const textareaEntrada = document.getElementById('entrada');
+    const divConsejo = document.getElementById('consejo');
+    const historial = document.getElementById('historial');
+
+    guardarBtn.addEventListener('click', () => {
+      console.log('Guardar clic ejecutado');
+      const emocion = selectEmocion.value;
+      const texto = textareaEntrada.value.trim();
+      console.log(`Emoción seleccionada: ${emocion}, texto ingresado: ${texto}`);
+      if (!texto) {
+        console.warn('No se ingresó texto');
+        return;
+      }
+
+      const fecha = new Date().toLocaleString();
+      const rec = recomendaciones[emocion] || { consejo: 'Reflexiona sobre tu estado.', acciones: 'Tómate un momento de pausa.', mejorar: 'Observa patrones emocionales.', evitar: 'Ignora tus sensaciones.' };
+      console.log(`Recomendaciones para ${emocion}:`, rec);
+
+      // Mostrar consejo
+      divConsejo.innerHTML = `<h2>${rec.consejo}</h2>
+        <ul>
+          <li><strong>Acciones:</strong> ${rec.acciones}</li>
+          <li><strong>Mejorar:</strong> ${rec.mejorar}</li>
+          <li><strong>Evitar:</strong> ${rec.evitar}</li>
+        </ul>`;
+
+      // Crear entrada histórica
+      const item = document.createElement('div');
+      item.className = 'entrada';
+
+      const fechaElem = document.createElement('strong');
+      fechaElem.textContent = fecha;
+
+      const emocionElem = document.createElement('div');
+      emocionElem.textContent = `Emoción: ${emocion}`;
+
+      const textoElem = document.createElement('div');
+      textoElem.textContent = texto;
+
+      const btnBorrar = document.createElement('button');
+      btnBorrar.className = 'borrar-btn';
+      btnBorrar.title = 'Eliminar';
+      btnBorrar.textContent = '✖';
+      btnBorrar.addEventListener('click', () => {
+        console.log(`Eliminando entrada de ${fecha}`);
+        item.remove();
+      });
+
+      item.append(fechaElem, emocionElem, textoElem, btnBorrar);
+      historial.prepend(item);
+
+      // Limpiar campo
+      textareaEntrada.value = '';
+      console.log('Entrada guardada y campo limpiado');
+    });
+  </script>
+</body>
+</html>
