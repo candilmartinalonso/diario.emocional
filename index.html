@@ -2,144 +2,80 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diario Emocional - Prompt Ultra</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Diario Emocional</title>
   <style>
-    html, body { height: 100%; }
-    body {
-      height: 100vh;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      font-family:'Segoe UI',sans-serif;
-      background:linear-gradient(120deg,#c9d6ff,#e2e2e2);
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    html,body{height:100%;}
+    body{
+      min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;
+      font-family:'Segoe UI',sans-serif;background:linear-gradient(120deg,#c9d6ff,#e2e2e2);
+    }
+    .container{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:#fff;border-radius:20px;max-width:480px;box-shadow:0 8px 24px rgba(0,0,0,.10);
+      padding:28px 18px 24px 18px;width:100%;
+    }
+    h2{margin-bottom:14px;text-align:center;}
+    textarea,button{
+      font-size:1rem;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;width:100%;
       box-sizing:border-box;
     }
-    .container {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      background:#fff;
-      border-radius:20px;
-      max-width:500px;
-      box-shadow:0 8px 20px rgba(0,0,0,0.1);
-      padding:32px 24px 30px 24px;
-      width:100%;
+    textarea{resize:vertical;min-height:84px;padding:10px;}
+    button{
+      background:#3498db;color:#fff;font-weight:500;border:none;cursor:pointer;
+      transition:background .18s;padding:11px;
     }
-    .container > * { width:100%; max-width:430px; }
-    h2 { margin-bottom:18px; text-align:center; width:100%; }
-    textarea, button {
-      font-size:1rem;
-      border:1px solid #ccc;
-      border-radius:8px;
-      margin-bottom:12px;
-      width:100%;
-      box-sizing:border-box;
+    button:hover{background:#2980b9;}
+    #promptFinal{
+      margin-top:14px;background:#f1f7fc;padding:12px;border-radius:8px;
+      color:#222;font-size:1.08rem;word-break:break-word;min-height:32px;
     }
-    textarea { resize:vertical; min-height:90px; padding:12px; }
-    button {
-      background:#3498db;
-      color:#fff;
-      font-weight:bold;
-      border:none;
-      cursor:pointer;
-      transition:background .2s;
-      padding:12px;
-    }
-    button:hover { background:#2980b9; }
-    #promptFinal {
-      margin-top:18px;
-      background:#f1f7fc;
-      padding:15px;
-      border-radius:8px;
-      color:#222;
-      font-size:1.1rem;
-      word-break:break-word;
-      text-align:left;
-      width:100%;
-      min-height:38px;
-      margin-bottom:10px;
-    }
-    #copiarBtn {
-      background:#27ae60;
-      margin-top:0;
-    }
-    #copiarBtn:hover { background:#219150; }
-    #copiadoMsg {
-      color:#27ae60;
-      font-size:1rem;
-      margin-top:6px;
-      display:none;
-      text-align:center;
-    }
-    #errorMsg {
-      color:#e74c3c;
-      font-size:1rem;
-      margin-top:8px;
-      display:none;
-      text-align:center;
-    }
+    #copiarBtn{background:#27ae60;}
+    #copiarBtn:hover{background:#219150;}
+    .msg{font-size:.98rem;margin-top:6px;display:none;text-align:center;}
+    .msg.ok{color:#27ae60;}
+    .msg.err{color:#e74c3c;}
   </style>
 </head>
 <body>
   <div class="container">
     <h2>¿Qué hiciste hoy?</h2>
-    <textarea id="entrada" placeholder="Escribí tu día... (ej: Hoy fui al cole, almorcé solo y estudié)"></textarea>
+    <textarea id="entrada" placeholder="Contá tu día, por simple que parezca..."></textarea>
     <button id="generarBtn">Generar prompt emocional</button>
     <div id="promptFinal"></div>
     <button id="copiarBtn" style="display:none;">Copiar prompt</button>
-    <div id="copiadoMsg">¡Prompt copiado!</div>
-    <div id="errorMsg">No se pudo copiar automáticamente. Seleccioná y copiá el texto de arriba manualmente.</div>
+    <div id="copiadoMsg" class="msg ok">¡Prompt copiado!</div>
+    <div id="errorMsg" class="msg err">No se pudo copiar automáticamente. Copiá el texto manualmente.</div>
   </div>
   <script>
-    const generarBtn = document.getElementById('generarBtn');
-    const entrada = document.getElementById('entrada');
-    const promptFinal = document.getElementById('promptFinal');
-    const copiarBtn = document.getElementById('copiarBtn');
-    const copiadoMsg = document.getElementById('copiadoMsg');
-    const errorMsg = document.getElementById('errorMsg');
+    const $ = id => document.getElementById(id);
+    const getPrompt = texto => `Leé mi relato del día: "${texto}". Analizá mi estado emocional real (con profundidad humana, no solo superficial o evidente). Explicá brevemente cómo lo inferiste. Después, ofreceme un consejo concreto y personalizado, como si fueras mi amigo más honesto y empático, pero también alguien con experiencia real en bienestar emocional. Evitá frases hechas, motivación vacía o consejos genéricos. Hablame directo, sin adornos ni clichés: máxima claridad, utilidad y empatía.`;
 
-    function getPrompt(texto) {
-      return `Leé con mucha atención lo que escribí sobre mi día: "${texto}". Sé honesto y analítico: inferí mi estado emocional real (no superficial ni automático, sino humano y profundo), explicá brevemente por qué lo creés, y después dame un consejo concreto y personalizado, como si fueras mi amigo de confianza pero también un experto en bienestar emocional. Nada de frases cliché ni motivacionales. Solo verdad, empatía y utilidad máxima.`;
-    }
-
-    generarBtn.addEventListener('click', () => {
-      const texto = entrada.value.trim();
+    $('generarBtn').onclick = () => {
+      const texto = $('entrada').value.trim();
       if (!texto) return;
-      const prompt = getPrompt(texto);
-      promptFinal.textContent = prompt;
-      copiarBtn.style.display = 'block';
-      copiadoMsg.style.display = 'none';
-      errorMsg.style.display = 'none';
-    });
+      $('promptFinal').textContent = getPrompt(texto);
+      $('copiarBtn').style.display = 'block';
+      $('copiadoMsg').style.display = 'none';
+      $('errorMsg').style.display = 'none';
+    };
 
-    copiarBtn.addEventListener('click', () => {
-      const text = promptFinal.textContent;
-      if (!text) return;
-      // Intenta copiar usando execCommand siempre (es el más compatible)
+    $('copiarBtn').onclick = () => {
+      const txt = $('promptFinal').textContent;
+      if (!txt) return;
       const temp = document.createElement('textarea');
-      temp.value = text;
-      document.body.appendChild(temp);
-      temp.select();
+      temp.value = txt; document.body.appendChild(temp); temp.select();
       try {
-        const exitoso = document.execCommand('copy');
-        if(exitoso) {
-          copiadoMsg.style.display = 'block';
-          errorMsg.style.display = 'none';
-          setTimeout(()=>{ copiadoMsg.style.display = 'none'; }, 1400);
-        } else {
-          throw new Error('No se pudo copiar');
-        }
-      } catch (err) {
-        errorMsg.style.display = 'block';
-        copiadoMsg.style.display = 'none';
+        document.execCommand('copy');
+        $('copiadoMsg').style.display = 'block';
+        $('errorMsg').style.display = 'none';
+        setTimeout(()=>{ $('copiadoMsg').style.display = 'none'; },1200);
+      } catch {
+        $('errorMsg').style.display = 'block';
+        $('copiadoMsg').style.display = 'none';
       }
       document.body.removeChild(temp);
-    });
+    };
   </script>
 </body>
 </html>
